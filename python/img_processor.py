@@ -21,8 +21,7 @@ class ImageProcessor(Node):
         # ROSの画像メッセージを、OpenCVのMat型（NumPy配列）に変換
         cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
-        # 【お仕事の経験が活きる画像処理エリア】
-        # 例：グレースケール（白黒）に変換
+        # グレースケール（白黒）に変換
         gray_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
         # OpenCVの画像を、再びROSの画像メッセージに変換して配信
