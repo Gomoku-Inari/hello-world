@@ -31,7 +31,7 @@ sudo apt install ros-jazzy-joy ros-jazzy-v4l2-camera ros-jazzy-image-view
 
 ## 🚀 起動方法
 
-ROS 2のワークスペース（`~/ros2_ws`）に配置し、ビルドしてLaunchファイルを実行します。3つのノードと表示ウィンドウが1コマンドで全自動で立ち上がります。
+ROS 2のワークスペース（`ros2-practice/`）に配置し、ビルドしてLaunchファイルを実行します。3つのノードと表示ウィンドウが1コマンドで全自動で立ち上がります。
 
 ```bash
 # 1. ワークスペースに移動
