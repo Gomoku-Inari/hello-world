@@ -25,7 +25,12 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            # 画像変換処理ノード
             'img_processor = my_camera_package.img_processor:main',
+            # モード変換(gesture)ノード
+            'gesture_controller = my_camera_package.gesture_controller_node:main',
+            # モード変換(ゲームパッド)ノード
+            'joy_controller = my_camera_package.joy_controller_node:main',
             'joy_test_node = my_camera_package.joy_test_node:main',
         ],
     },

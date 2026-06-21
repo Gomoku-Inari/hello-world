@@ -1,34 +1,36 @@
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
-from std_msgs.msg import String  # 🌟 スマホや別ノードからの文字列を受け取るために追加！
+from sensor_msgs.msg import Image, Joy
 from cv_bridge import CvBridge
 import cv2
 
+# 🌟 分割したファイルから必要な仕様と実装をインポート
+from .interfaces import ModeResolverInterface
+from .joy_resolver import JoyModeResolver
+from .gesture_resolver import GestureModeResolver
+
 class ImageProcessor(Node):
-    def __init__(self):
+    def __init__(self, resolver: ModeResolverInterface):
         super().__init__('image_processor')
         
-        # 初期モードは白黒
+        self.resolver = resolver
         self.current_mode = "gray"
-        self.bridge = CvBridge()
-
-        # 1. 映像ソースのサブスクライバとパブリッシャ
+        
         self.subscription = self.create_subscription(
             Image, '/image_raw', self.image_callback, 10)
         self.publisher = self.create_publisher(Image, '/image_gray', 10)
         
-        # 🌟 2. 【recvMode界面】外部（指認識やスマホ）からのモード変更要求を待ち受ける
-        self.mode_subscription = self.create_subscription(
-            String, '/current_mode', self.mode_callback, 10)
+        # ゲームパッドトピックの購読
+        self.joy_subscription = self.create_subscription(
+            Joy, '/joy', self.control_callback, 10)
+        
+        self.bridge = CvBridge()
 
-    # 🌟 3. モード文字列が届いた時に動く関数（割り込み回数は激減しています）
-    def mode_callback(self, msg):
-        self.current_mode = msg.data
-        self.get_logger().info(f"画像処理モードを切り替えました ➔ : {self.current_mode}")
+    def control_callback(self, msg):
+        self.current_mode = self.resolver.resolve_mode(msg)
+        self.get_logger().info(f"現在の処理モード: {self.current_mode}")
 
     def image_callback(self, msg):
-        # 外部の割り込みを気にせず、30fpsの画像処理に集中
         cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
 
         if self.current_mode == "gray":
@@ -45,9 +47,15 @@ class ImageProcessor(Node):
         ros_image = self.bridge.cv2_to_imgmsg(processed_image, encoding=encoding)
         self.publisher.publish(ros_image)
 
+
 def main(args=None):
     rclpy.init(args=args)
-    node = ImageProcessor()  # 🌟 引数（Resolver）の注入が不要になり、完全に単体化！
+    
+    # 🌟 依存性の注入（DI）
+    # resolver = JoyModeResolver()
+    resolver = GestureModeResolver()
+    node = ImageProcessor(resolver)
+    
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
