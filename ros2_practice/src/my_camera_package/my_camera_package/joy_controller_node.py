@@ -2,54 +2,46 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
 from std_msgs.msg import String
+from .mode_state_machine import ModeStateMachine  # 状態マシンをインポート
 
-class JoyController(Node):
+class JoyControllerNode(Node):
     def __init__(self):
         super().__init__('joy_controller')
         
-        self.current_mode = "gray"
-
-        # ゲームパッドのトピックを購読
-        self.subscription = self.create_subscription(
-            Joy, '/joy', self.joy_callback, 10)
-        
-        # 🌟 追加：現在のモードを自分自身でも購読して「記憶を同期」させる
-        self.mode_subscription = self.create_subscription(
-            String, '/current_mode', self.mode_sync_callback, 10)
-        
-        # 共通言語である /current_mode にパブリッシュするパブリッシャ
         self.mode_publisher = self.create_publisher(String, '/current_mode', 10)
-        
-        self.get_logger().info("ゲームパッド制御ノード（同期版）が起動しました。")
 
-    # 🌟 追加：誰かがモードを変えたら、自分の変数も最新に上書きする
+        # 🌟 自身のパブリッシュ関数をコールバックとして状態マシンに「教育」して内包
+        self.state_machine = ModeStateMachine(
+            on_mode_changed_callback=self._publish_mode
+        )
+
+        # トピック設定
+        self.subscription = self.create_subscription(Joy, '/joy', self.joy_callback, 10)
+        self.mode_subscription = self.create_subscription(String, '/current_mode', self.mode_sync_callback, 10)
+        self.get_logger().info("ゲームパッド制御ノード（コールバックインジェクション版）が起動しました。")
+
+    def _publish_mode(self, mode_str: str):
+        self.get_logger().info("JoyControllerNode::_publish_mode")
+        """状態マシンから自動で呼び出されるパブリッシュの実体"""
+        msg = String(data=mode_str)
+        self.mode_publisher.publish(msg)
+        self.get_logger().info(f"【状態変化】 /current_mode にパブリッシュしました: {mode_str}")
+
     def mode_sync_callback(self, msg):
-        self.current_mode = msg.data
+        self.state_machine.sync_mode(msg.data)
 
     def joy_callback(self, msg):
-        new_mode = self.current_mode
-
-        # 各ボタンのインデックス（0, 1, 2）を明示的に指定
+        # 🌟 ノード側は判定を見て「ただ設定を要求するだけ」になり、驚くほどスッキリ！
         if msg.buttons[0] == 1:
-            new_mode = "gray"
+            self.state_machine.set_mode("gray")
         elif msg.buttons[1] == 1:
-            new_mode = "color"
+            self.state_machine.set_mode("color")
         elif msg.buttons[2] == 1:
-            new_mode = "face"
-
-        # 記憶が同期されているため、ここのエッジ判定が常に正しく動きます
-        if new_mode != self.current_mode:
-            self.current_mode = new_mode
-            
-            msg_str = String()
-            msg_str.data = self.current_mode
-            self.mode_publisher.publish(msg_str)
-            
-            self.get_logger().info(f"【Joyボタン検知】 /current_mode にパブリッシュしました: {self.current_mode}")
+            self.state_machine.set_mode("face")
 
 def main(args=None):
     rclpy.init(args=args)
-    node = JoyController()
+    node = JoyControllerNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

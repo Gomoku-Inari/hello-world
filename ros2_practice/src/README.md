@@ -90,3 +90,25 @@ ros2 launch my_camera_package camera_system.launch.py
 - **0 番ボタン（多くのパッドでAボタン）** ➔ **グレースケールモード** に変更
 - **1 番ボタン（多くのパッドでBボタン）** ➔ **カラーモード** に変更
 - **2 番ボタン（多くのパッドでXボタン）** ➔ **顔検出枠モード** に変更
+
+## 🧪 ユニットテストとCI/CD (GitHub Actions)
+
+本パッケージは「単一責任の原則」に基づき、状態管理とエッジトリガー判定のコアロジック（`ModeStateMachine`）をROS 2のミドルウェアから完全に隔離（コンポジションパターンによる委譲）しています。
+これにより、大掛かりなROS 2環境を必要とせず、GitHub Actionsの軽量な標準Pythonランナー環境上で**0.1秒以下で完了する爆速なユニットテスト（CI/CD）**を実現しています。
+
+### 1. ローカル環境でのユニットテスト実行方法
+ROS 2の環境（setup.bashなど）を読み込む必要はありません。Pythonの仮想環境（`venv`）をアクティベートした状態で、ROSプラグインの干渉を抑止して実行します。
+
+```bash
+# パッケージのルートフォルダに移動
+cd ~/ros2_ws/src/my_camera_package
+
+# 仮想環境のアクティベート
+source ~/ros2_ws/venv/bin/activate
+
+# テストの実行（ROSプラグインを無視してピュアに実行）
+PYTHONPATH=. pytest test/test_state_machine.py -p no:pytest11 -v
+```
+
+### 2. GitHub Actions (自動化されたCI)
+`.github/workflows/python-test.yml` を配置しているため、`master`/`main` ブランチへ `git push` またはプルリクエストが送られた瞬間、GitHubのクラウド上で自動的に上記テストが実行されます。ROS 2のaptリポジトリ追加やビルド（`colcon build`）を一切挟まないため、数秒でクリーンにテストが合格（オールグリーン）します。
