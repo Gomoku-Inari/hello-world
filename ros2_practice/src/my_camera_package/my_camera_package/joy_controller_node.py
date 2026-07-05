@@ -38,6 +38,8 @@ class JoyControllerNode(Node):
             self.state_machine.set_mode("color")
         elif msg.buttons[2] == 1:
             self.state_machine.set_mode("face")
+        elif msg.buttons[3] == 1:
+            self.state_machine.set_mode("BIOLOGICAL")
 
 def main(args=None):
     rclpy.init(args=args)

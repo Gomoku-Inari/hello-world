@@ -86,6 +86,8 @@ class GestureController(Node):
                     target_mode = "gray"
                 elif finger_count == 2:
                     target_mode = "color"
+                elif finger_count == 3:
+                    target_mode = "BIOLOGICAL"
                 elif finger_count == 5:
                     target_mode = "face"
 
