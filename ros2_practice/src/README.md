@@ -41,7 +41,7 @@ sudo apt install ros-jazzy-joy ros-jazzy-v4l2-camera ros-jazzy-image-view
 ROS 2ワークスペースの直下に仮想環境を作成し、`solutions` APIが健在な安定バージョンのMediaPipeをインストールします。
 ```bash
 # ワークスペースに移動
-cd ~/hello_world/ros2_practice/
+cd ~/hello-world/ros2_practice/
 
 # 仮想環境「venv」の作成とアクティベート
 python3 -m venv venv
@@ -55,13 +55,13 @@ pip install mediapipe==0.10.21
 ROS 2のプロセスが、隔離された仮想環境内のMediaPipeを正しく発見できるように、ビルド先（site-packages）へショートカットを直接作成します。
 ```bash
 # 事前に一度クリーンビルドを実行
-cd ~/hello_world/ros2_practice
+cd ~/hello-world/ros2_practice
 rm -rf build/ install/ log/
 colcon build
 
 # 仮想環境のライブラリへのシンボリックリンクを作成 (1行ずつ実行)
-ln -s ~/hello_world/ros2_practice/venv/lib/python3.12/site-packages/mediapipe ~/hello_world/ros2_practice/install/my_camera_package/lib/python3.12/site-packages/
-ln -s ~/hello_world/ros2_practice/venv/lib/python3.12/site-packages/google ~/hello_world/ros2_practice/install/my_camera_package/lib/python3.12/site-packages/
+ln -s ~/hello-world/ros2_practice/venv/lib/python3.12/site-packages/mediapipe ~/hello-world/ros2_practice/install/my_camera_package/lib/python3.12/site-packages/
+ln -s ~/hello-world/ros2_practice/venv/lib/python3.12/site-packages/google ~/hello-world/ros2_practice/install/my_camera_package/lib/python3.12/site-packages/
 ```
 
 ## 🚀 実行方法
@@ -70,8 +70,8 @@ ln -s ~/hello_world/ros2_practice/venv/lib/python3.12/site-packages/google ~/hel
 
 ```bash
 # 1. 仮想環境とROS環境の二重読み込み
-source ~/hello_world/ros2_practice/venv/bin/activate
-source ~/hello_world/ros2_practice/install/setup.bash
+source ~/hello-world/ros2_practice/venv/bin/activate
+source ~/hello-world/ros2_practice/install/setup.bash
 
 # 2. Launchファイルによる一発起動！
 ros2 launch my_camera_package camera_system.launch.py
