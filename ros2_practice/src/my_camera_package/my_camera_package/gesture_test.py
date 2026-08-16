@@ -1,66 +1,64 @@
 import cv2
-import mediapipe as mp
+import sys
+from .yolo_finger_detector import YOLOFingerDetector
+
 
 def main():
-    # 1. MediaPipeの手検出セットアップ
-    mp_hands = mp.solutions.hands
-    hands = mp_hands.Hands(max_num_hands=1, min_detection_confidence=0.7)
-    mp_draw = mp.solutions.drawing_utils
-
-    # 2. PCのWebカメラを直接オープン
+    # コマンドライン引数でデバイスを指定: python -m my_camera_package.gesture_test cpu|0|npu
+    device = sys.argv[1] if len(sys.argv) > 1 else 'cpu'
+    print(f"\n=== YOLO 指検出テスト（デバイス: {device}）===")
+    print("[q]キーで終了\n")
+    
+    # NPU用の初期化ヒント
+    if device == 'npu':
+        print("💡 Intel Core Ultra NPU を使用しています。")
+        print("   OpenVINO がインストールされていることを確認してください:")
+        print("   pip install openvino openvino-dev\n")
+    
+    detector = YOLOFingerDetector(model_path='yolov8n.pt', confidence=0.25, device=device)
     cap = cv2.VideoCapture(0)
+    
+    if not cap.isOpened():
+        print("ERROR: カメラを開けません。")
+        return
 
-    print("単体テストを開始します。カメラに向かって手をかざしてください。[q]キーで終了します。")
+    print("YOLO 指検出テストを開始します。カメラに向かって手をかざしてください。")
 
+    frame_count = 0
+    
     while cap.isOpened():
         success, frame = cap.read()
         if not success:
             break
 
-        # MediaPipe用に画像をRGBに変換
-        image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = hands.process(image_rgb)
+        frame_count += 1
 
-        finger_count = 0
+        try:
+            finger_count = detector.detect_finger_count(frame)
+        except Exception as exc:
+            print(f"YOLO detection failed: {exc}")
+            finger_count = 0
 
-        # 手が検出された場合の処理
-        if results.multi_hand_landmarks:
-            # 🌟 enumerateを使ってループのインデックス(idx)を正確に取得
-            for idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
-                # 画面に手の骨格線を描画
-                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+        # デバッグ用：検出結果を標準出力に出す（30フレームごと）
+        if frame_count % 30 == 0:
+            try:
+                from ultralytics import YOLO
+                if detector.model:
+                    results = detector.model(frame, conf=detector.confidence, verbose=False)
+                    if results:
+                        result = results[0]
+                        detected_classes = []
+                        if hasattr(result, 'boxes') and result.boxes is not None:
+                            names = result.names or {}
+                            cls_list = result.boxes.cls
+                            if cls_list is not None:
+                                class_ids = cls_list.cpu().numpy().astype(int).tolist() if hasattr(cls_list, 'cpu') else cls_list
+                                detected_classes = [names.get(int(cid), str(cid)) for cid in class_ids]
+                        print(f"[Frame {frame_count}] Device: {detector.device}, Detected: {detected_classes}, Fingers: {finger_count}")
+            except Exception as debug_exc:
+                pass
 
-                # 検出された手が「右手」か「左手」かのラベルを取得
-                hand_label = results.multi_handedness[idx].classification[0].label # 'Left' または 'Right'
-
-                # 🌟 正しい指の先端のID定義（4:親指、8:人差し指、12:中指、16:薬指、20:小指）
-                tips_ids = [4, 8, 12, 16, 20]
-                fingers = []
-
-                # 4本の指（人差し指〜小指）のY軸判定
-                for id in tips_ids[1:]:
-                    if hand_landmarks.landmark[id].y < hand_landmarks.landmark[id - 2].y:
-                        fingers.append(1)
-                    else:
-                        fingers.append(0)
-
-                # 親指のX軸判定（左右でロジックを反転）
-                if hand_label == "Right":
-                    if hand_landmarks.landmark[tips_ids[0]].x < hand_landmarks.landmark[tips_ids[0] - 1].x:
-                        fingers.append(1)
-                    else:
-                        fingers.append(0)
-                else:
-                    if hand_landmarks.landmark[tips_ids[0]].x > hand_landmarks.landmark[tips_ids[0] - 1].x:
-                        fingers.append(1)
-                    else:
-                        fingers.append(0)
-
-                # 立っている指の合計本数
-                finger_count = sum(fingers)
-
-        # 画面に指の本数と、認識した手の左右をリアルタイム描画
-        cv2.putText(frame, f'Fingers: {finger_count}', (30, 80), 
+        cv2.putText(frame, f'Fingers: {finger_count}', (30, 80),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 3)
 
         cv2.imshow('Gesture Test', frame)
@@ -69,6 +67,7 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main()
