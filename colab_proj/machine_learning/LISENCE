@@ -1,0 +1,9 @@
+## License / ライセンス
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). 
+This repository uses the YOLOv8 model by Ultralytics.
+
+本プロジェクトは GNU Affero General Public License v3.0 (AGPL-3.0) のもとで公開されています。
+本プログラムは、Ultralytics社の YOLOv8 モデルを利用しています。
+
+- **YOLOv8 License**: [Ultralytics License (AGPL-3.0)](https://github.com)
