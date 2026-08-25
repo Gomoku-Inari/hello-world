@@ -4,6 +4,7 @@
 [![YOLOv8](https://shields.io)](https://github.com)
 [![Google Colab](https://shields.io)](https://google.com)
 [![License](https://shields.io)](https://github.com/blob/main/LICENSE)
+[![Open In Colab](https://google.com)](https://google.com)
 
 ## 📌 概要
 本プロジェクトは、手元のPCスペック（低スペック、AC直結駆動による電力制限等）に関わらず、**手動アノテーションの手間と初期投資コストを完全にゼロ化**してオリジナルYOLOv8モデルを最速で育てるための、クラウド完結型「自動学習トライアルパッケージ」です。
@@ -32,7 +33,7 @@ AIの重い行列計算（学習）を手元のノートPCで行うと、排熱�
 ```text
 .
 ├── README.md
-└── yolo_auto_factory.ipynb  # Google Colab用 一気通貫学習ノートブック（Python 3.13 / 最新仕様対応）
+└── machine_learning_colab.ipynb  # Google Colab用 一気通貫学習ノートブック（Python 3.13 / 最新仕様対応）
 ```
 
 ※実行すると、指定したGoogle Drive内に自動的に `yolo_dataset/images` および `labels` が生成され、最終成果物として `output/best.pt` が書き出されます。
@@ -46,7 +47,14 @@ AIの重い行列計算（学習）を手元のノートPCで行うと、排熱�
 2. Google Driveのマイ・ドライブのトップに `AI_study` という名前のフォルダを作り、動画を `my_hand_video.mp4` としてアップロードします。
 
 ### Step 2: Google Colabでの実行
-1. 本リポジトリの `yolo_auto_factory.ipynb` をGoogle Colab環境で開きます。
+以下のリンク（バッジ）から直接Google Colabでノートブックを開き、手順に従って実行可能です。
+
+[![Open In Colab](https://google.com)](https://google.com)
+
+*   **GPU設定:** 「ランタイムのタイプを変更」からT4 GPUを選択。
+*   **実行:** 上から順に実行し、必要に応じてセッションを再起動。
+
+1. 本リポジトリの `machine_learning_colab.ipynb` をGoogle Colab環境で開きます。
 2. メニューの「ランタイム」 ➔ 「ランタイムのタイプを変更」から、ハードウェアアクセラレータを **`T4 GPU`** に変更して保存します。
 3. ノートブックのセルを上から順番に実行します（セル1実行後、警告に従い「セッションを再起動」を1度行ってください）。
 
