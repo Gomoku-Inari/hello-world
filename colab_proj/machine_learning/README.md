@@ -1,10 +1,12 @@
 # YOLOv8 Auto Dataset Factory & Training Trial
 
-[![Python](https://shields.io)](https://python.org)
-[![YOLOv8](https://shields.io)](https://github.com)
-[![Google Colab](https://shields.io)](https://google.com)
-[![License](https://shields.io)](https://github.com/blob/main/LICENSE)
-[![Open In Colab](https://google.com)](https://google.com)
+[Python](https://python.org)
+
+[YOLOv8](https://github.com)
+
+[Google Colab](https://colab.research.google.com/)
+
+[License](https://github.com/blob/main/LICENSE)
 
 ## 📌 概要
 本プロジェクトは、手元のPCスペック（低スペック、AC直結駆動による電力制限等）に関わらず、**手動アノテーションの手間と初期投資コストを完全にゼロ化**してオリジナルYOLOv8モデルを最速で育てるための、クラウド完結型「自動学習トライアルパッケージ」です。
@@ -49,7 +51,7 @@ AIの重い行列計算（学習）を手元のノートPCで行うと、排熱�
 ### Step 2: Google Colabでの実行
 以下のリンク（バッジ）から直接Google Colabでノートブックを開き、手順に従って実行可能です。
 
-[![Open In Colab](https://google.com)](https://google.com)
+[Google Colab](https://colab.research.google.com/)
 
 *   **GPU設定:** 「ランタイムのタイプを変更」からT4 GPUを選択。
 *   **実行:** 上から順に実行し、必要に応じてセッションを再起動。
